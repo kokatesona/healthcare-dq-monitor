@@ -2,7 +2,6 @@
 
 import numpy as np
 import pickle
-import pytest
 import torch
 
 

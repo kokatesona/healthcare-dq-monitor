@@ -17,7 +17,7 @@ Run:
 import hashlib
 import os
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import duckdb

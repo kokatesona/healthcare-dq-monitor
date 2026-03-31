@@ -1,7 +1,6 @@
 """Tests for src/ingest — run with: pytest tests/test_ingest.py -v"""
 
 import duckdb
-import pytest
 
 from src.ingest.generate_synthetic import (
     VITAL_RANGES,
@@ -86,8 +85,8 @@ class TestDuckDBRoundtrip:
     def test_roundtrip(self, tmp_path):
         patients    = generate_patients(20)
         admissions  = generate_admissions(patients, 30)
-        diagnoses   = generate_diagnoses(admissions)
-        chartevents = generate_chartevents(admissions, 100)
+        _diagnoses  = generate_diagnoses(admissions)
+        __chartevents = generate_chartevents(admissions, 100)
 
         con = duckdb.connect(str(tmp_path / "test.duckdb"))
         con.execute("CREATE TABLE raw_patients      AS SELECT * FROM patients")
