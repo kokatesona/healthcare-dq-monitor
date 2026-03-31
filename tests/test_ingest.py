@@ -83,16 +83,19 @@ class TestGenerateChartevents:
 
 class TestDuckDBRoundtrip:
     def test_roundtrip(self, tmp_path):
-        p = generate_patients(20)
-        a = generate_admissions(p, 30)
-        d = generate_diagnoses(a)
-        c = generate_chartevents(a, 100)
+        patients   = generate_patients(20)
+        admissions = generate_admissions(patients, 30)
 
         con = duckdb.connect(str(tmp_path / "test.duckdb"))
-        con.execute("CREATE TABLE raw_patients      AS SELECT * FROM p")
-        con.execute("CREATE TABLE raw_admissions    AS SELECT * FROM a")
-        con.execute("CREATE TABLE raw_diagnoses_icd AS SELECT * FROM d")
-        con.execute("CREATE TABLE raw_chartevents   AS SELECT * FROM c")
+        con.register("patients",   patients)
+        con.register("admissions", admissions)
+        con.register("diagnoses",   generate_diagnoses(admissions))
+        con.register("chartevents", generate_chartevents(admissions, 100))
+
+        con.execute("CREATE TABLE raw_patients      AS SELECT * FROM patients")
+        con.execute("CREATE TABLE raw_admissions    AS SELECT * FROM admissions")
+        con.execute("CREATE TABLE raw_diagnoses_icd AS SELECT * FROM diagnoses")
+        con.execute("CREATE TABLE raw_chartevents   AS SELECT * FROM chartevents")
 
         assert con.execute("SELECT COUNT(*) FROM raw_patients").fetchone()[0] == 20
         assert con.execute("SELECT COUNT(*) FROM raw_admissions").fetchone()[0] == 30
