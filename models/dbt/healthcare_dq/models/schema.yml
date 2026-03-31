@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: stg_patients
+    description: "Cleaned patients. subject_id is salted SHA-256 hash — HIPAA-aware."
+    columns:
+      - name: subject_id
+        tests: [not_null, unique]
+      - name: gender
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["M", "F"]
+      - name: anchor_age
+        tests: [not_null]
+
+  - name: stg_admissions
+    description: "Standardised admissions with derived LOS in hours."
+    columns:
+      - name: hadm_id
+        tests: [not_null, unique]
+      - name: subject_id
+        tests: [not_null]
+      - name: los_hours
+        tests: [not_null]
+      - name: admission_type
+        tests:
+          - accepted_values:
+              values: ["EMERGENCY", "ELECTIVE", "URGENT"]
+
+  - name: stg_chartevents
+    description: "6 vital sign measurements only."
+    columns:
+      - name: hadm_id
+        tests: [not_null]
+      - name: vital_name
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["heart_rate", "systolic_bp", "diastolic_bp",
+                       "spo2", "temperature_c", "respiratory_rate"]
+
+  - name: stg_diagnoses_icd
+    description: "ICD-9 codes with validity flag."
+    columns:
+      - name: hadm_id
+        tests: [not_null]
+      - name: icd9_code
+        tests: [not_null]
+      - name: is_valid_icd
+        tests: [not_null]
+
+  - name: mart_icu_vitals
+    description: "Pivoted vitals — one row per (hadm_id, charttime). Primary ML input."
+    columns:
+      - name: hadm_id
+        tests: [not_null]
+      - name: charttime
+        tests: [not_null]
+      - name: missing_vitals_count
+        tests: [not_null]
+
+  - name: mart_patient_summary
+    description: "Admission-level DQ rollup for Streamlit dashboard and trust scorer."
+    columns:
+      - name: hadm_id
+        tests: [not_null, unique]
+      - name: raw_dq_score
+        description: "Rule-based DQ score 0-100. Input feature to ML trust scorer."

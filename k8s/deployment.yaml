@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthcare-dq-streamlit
+  labels:
+    app: healthcare-dq-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthcare-dq-monitor
+  template:
+    metadata:
+      labels:
+        app: healthcare-dq-monitor
+    spec:
+      containers:
+        - name: streamlit
+          image: healthcare-dq-monitor:latest
+          ports:
+            - containerPort: 8501
+          env:
+            - name: DUCKDB_PATH
+              value: "/data/healthcare.duckdb"
+            - name: MLFLOW_TRACKING_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: healthcare-dq-config
+                  key: MLFLOW_TRACKING_URI
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: healthcare-dq-secrets
+                  key: OPENAI_API_KEY
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: healthcare-dq-service
+spec:
+  selector:
+    app: healthcare-dq-monitor
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8501
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: healthcare-dq-config
+data:
+  MLFLOW_TRACKING_URI: "http://mlflow-service:5001"
+  MLFLOW_EXPERIMENT_NAME: "healthcare-dq-monitor"

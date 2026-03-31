@@ -1,0 +1,39 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Data — never commit raw patient data
+data/
+*.duckdb
+*.parquet
+*.csv
+
+# Environment
+.env
+
+# dbt
+models/dbt/healthcare_dq/target/
+models/dbt/healthcare_dq/dbt_packages/
+models/dbt/healthcare_dq/logs/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Models
+models/*.pt
+models/*.pkl
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

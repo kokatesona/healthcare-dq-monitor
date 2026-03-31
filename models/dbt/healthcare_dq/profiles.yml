@@ -1,0 +1,7 @@
+healthcare_dq:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../../../data/healthcare.duckdb"
+      threads: 4
